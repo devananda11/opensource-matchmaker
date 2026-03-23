@@ -56,6 +56,7 @@ def search_good_first_issues(language):
             "repo_name": issue["repository_url"].split("/")[-1],
             "repo_url": issue["repository_url"],  
             "issue_title": issue["title"],
+            "issue_body": issue.get("body", ""),
             "issue_url": issue["html_url"],
             "language": language
         }

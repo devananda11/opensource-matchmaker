@@ -2,15 +2,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from backend.matcher import run_matching_pipeline
 from backend.health_check import check_repo_health
+from backend.ai_description import explain_issue
 
 app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 app.add_middleware(
     CORSMiddleware,
@@ -72,3 +66,14 @@ def test_health():
         "repo": repo["name"],
         "health_score": score
     }
+@app.post("/explain")
+def explain(data: dict):
+    title = data.get("title")
+    body = data.get("body", "")
+
+    if not title:
+        return {"error": "Missing title"}
+
+    explanation = explain_issue(title, body)
+
+    return {"explanation": explanation}

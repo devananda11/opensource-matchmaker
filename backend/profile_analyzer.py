@@ -17,7 +17,6 @@ def detect_top_languages(language_count, top_n=2):
 def analyze_profile(repos):
     language_count = count_languages(repos)
     top_languages = detect_top_languages(language_count)
-
     return {
         "top_languages": top_languages,
         "language_count": language_count

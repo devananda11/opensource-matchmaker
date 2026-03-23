@@ -1,10 +1,42 @@
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 function App() {
   const [username, setUsername] = useState("");
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [explanations, setExplanations] = useState({});
+  const [loadingExplain, setLoadingExplain] = useState(null);
+  const [selectedExplanation, setSelectedExplanation] = useState(null);
+
+ const handleExplain = async (item) => {
+  setLoadingExplain(item.issue_url);
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/explain`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: item.issue_title,
+        body: item.issue_body || item.issue_title,
+      }),
+    });
+
+    const data = await res.json();
+
+    setSelectedExplanation({
+      title: item.issue_title,
+      text: data.explanation,
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
+  setLoadingExplain(null);
+};
 
   // ✨ Cursor glow
   useEffect(() => {
@@ -27,7 +59,7 @@ function App() {
     setHasSearched(true);
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/recommend/${username}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/recommend/${username}`);
       const data = await res.json();
       setResults(data.recommendations || []);
     } catch (err) {
@@ -164,11 +196,44 @@ function App() {
                   >
                     View →
                   </a>
+                  <button onClick={() => handleExplain(item)} className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-400">
+                    {loadingExplain === item.issue_url ? "Explaining..." : "Explain "}
+                  </button>
+                  {explanations[item.issue_url] && (
+                    <div className="mt-3 text-sm text-gray-300 bg-[#0d1117] p-3 rounded">
+                      {explanations[item.issue_url]}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
+        </div>
+      )}
+      {selectedExplanation && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+
+          <div className="bg-[#161b22] p-6 rounded-xl max-w-lg w-full max-h-[80vh] overflow-y-auto relative">
+
+            <button
+              onClick={() => setSelectedExplanation(null)}
+              className="absolute top-2 right-3 text-gray-400 hover:text-white"
+            >
+              ✕
+            </button>
+
+            <h2 className="text-lg font-semibold mb-3">
+              {selectedExplanation.title}
+            </h2>
+
+            <div className="prose prose-invert max-w-none text-sm prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300 prose-code:bg-black prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-black prose-pre:p-3 prose-pre:rounded">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {selectedExplanation.text}
+              </ReactMarkdown>
+            </div>
+
+          </div>
         </div>
       )}
     </div>
