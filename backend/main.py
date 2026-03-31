@@ -25,6 +25,9 @@ def home():
 def recommend(username: str, language: str = Query(None), bypass_health: bool = Query(False)):
 
     try:
+        language = language.strip() if isinstance(language, str) else language
+        if language == "":
+            language = None
         
         matches = run_matching_pipeline(username, language)
 
@@ -69,6 +72,19 @@ def test_health():
         "repo": repo["name"],
         "health_score": score
     }
+@app.get("/rate-limit")
+def rate_limit():
+    import requests
+
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "FirstIssue-App"
+    }
+
+    response = requests.get("https://api.github.com/rate_limit", headers=headers, timeout=10)
+    return response.json()
+
+
 @app.post("/explain")
 def explain(data: dict):
     title = data.get("title")
