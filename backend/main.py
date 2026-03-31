@@ -1,9 +1,9 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI,Query
-from backend.matcher import run_matching_pipeline
-from backend.health_check import check_repo_health
-from backend.ai_description import explain_issue
-from backend.github_api import search_good_first_issues
+from .matcher import run_matching_pipeline
+from .health_check import check_repo_health
+from .ai_description import explain_issue
+from .github_api import search_good_first_issues
 
 app = FastAPI()
 
