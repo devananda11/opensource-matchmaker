@@ -12,6 +12,8 @@ def get_user_repos(username):
     }
 
     response = requests.get(url, headers=headers, timeout=10)
+    print("STATUS:", response.status_code)
+    print("RESPONSE:", response.text[:200])
 
     if response.status_code != 200:
         print("Error fetching repos")
@@ -43,6 +45,8 @@ def search_good_first_issues(language):
     }
 
     response = requests.get(url, headers=headers, timeout=10)
+    print("STATUS:", response.status_code)
+    print("RESPONSE:", response.text[:200])
 
     if response.status_code != 200:
         return []
