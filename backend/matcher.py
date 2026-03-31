@@ -1,5 +1,5 @@
-from backend.github_api import get_user_repos, search_good_first_issues
-from backend.profile_analyzer import analyze_profile
+from .github_api import get_user_repos, search_good_first_issues
+from .profile_analyzer import analyze_profile
 
 def run_matching_pipeline(username,language=None):
 
