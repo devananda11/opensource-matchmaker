@@ -29,9 +29,7 @@ GitHub → Profile Analysis → Issue Search → Matching → Health Check → A
 
 ## Demo Video
 
-[Watch the demo](./docs/demo.mp4)
-
-<video src="./docs/demo.mp4" controls muted width="100%"></video>
+[Watch the demo](https://drive.google.com/file/d/1LiwzjdoamCyz6aopfeem0IaxPc_05wYK/view?usp=drive_link)
 
 ---
 
