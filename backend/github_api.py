@@ -1,9 +1,35 @@
 import requests
+from datetime import datetime, timedelta
 
 BASE_URL = "https://api.github.com"
 
+# Simple in-memory per-process cache
+_REPO_CACHE = {}
+_ISSUE_CACHE = {}
+
+CACHE_TTL = timedelta(minutes=3)
+
+
+def _cache_get(cache, key):
+    entry = cache.get(key)
+    if not entry:
+        return None
+    value, expires_at = entry
+    if datetime.utcnow() >= expires_at:
+        cache.pop(key, None)
+        return None
+    return value
+
+
+def _cache_set(cache, key, value):
+    cache[key] = (value, datetime.utcnow() + CACHE_TTL)
+
 
 def get_user_repos(username):
+    cached = _cache_get(_REPO_CACHE, username)
+    if cached is not None:
+        return cached
+
     url = f"{BASE_URL}/users/{username}/repos"
 
     headers = {
@@ -34,6 +60,7 @@ def get_user_repos(username):
 
         repos.append(repo_info)
 
+    _cache_set(_REPO_CACHE, username, repos)
     return repos
 
 def search_good_first_issues(language):
@@ -43,6 +70,11 @@ def search_good_first_issues(language):
         "Accept": "application/vnd.github+json",
         "User-Agent": "FirstIssue-App"
     }
+
+    cache_key = language.lower().strip()
+    cached = _cache_get(_ISSUE_CACHE, cache_key)
+    if cached is not None:
+        return cached
 
     response = requests.get(url, headers=headers, timeout=10)
     print("STATUS:", response.status_code)
@@ -73,5 +105,7 @@ def search_good_first_issues(language):
         }
 
         issues.append(issue_info)
+
+    _cache_set(_ISSUE_CACHE, cache_key, issues)
 
     return issues
