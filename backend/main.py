@@ -25,6 +25,9 @@ def home():
 def recommend(username: str, language: str = Query(None)):
 
     try:
+        language = language.strip() if isinstance(language, str) else language
+        if language == "":
+            language = None
         
         matches = run_matching_pipeline(username, language)
 

@@ -1,15 +1,25 @@
+import os
 import requests
 
 BASE_URL = "https://api.github.com"
 
 
-def get_user_repos(username):
-    url = f"{BASE_URL}/users/{username}/repos"
-
+def _github_headers():
     headers = {
         "Accept": "application/vnd.github+json",
         "User-Agent": "FirstIssue-App"
     }
+
+    token = os.getenv("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    return headers
+
+
+def get_user_repos(username):
+    url = f"{BASE_URL}/users/{username}/repos"
+    headers = _github_headers()
 
     response = requests.get(url, headers=headers, timeout=10)
     print("STATUS:", response.status_code)
@@ -37,12 +47,19 @@ def get_user_repos(username):
     return repos
 
 def search_good_first_issues(language):
-    url = f"https://api.github.com/search/issues?q=label:\"good first issue\"+language:{language}+state:open+archived:false"
+    query_parts = [
+        'label:"good first issue"',
+        'is:issue',
+        'state:open',
+        'archived:false',
+    ]
 
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "User-Agent": "FirstIssue-App"
-    }
+    if language and str(language).strip():
+        query_parts.append(f"language:{str(language).strip()}")
+
+    query = "+".join(query_parts)
+    url = f"https://api.github.com/search/issues?q={query}"
+    headers = _github_headers()
 
     response = requests.get(url, headers=headers, timeout=10)
     print("STATUS:", response.status_code)
